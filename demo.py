@@ -1,5 +1,6 @@
 #! /usr/bin/env python
-import sys, random, numpy
+import sys, random
+import numpy as np
 
 # Evaluate the energy given a coupling matrix and configuration
 def evaluate_energy(J, cfg):
@@ -11,7 +12,7 @@ def evaluate_energy(J, cfg):
 
 # Read coupling matrix
 N = 300
-J = numpy.zeros((N,N))
+J = np.zeros((N,N))
 with open(sys.argv[1], 'r') as f:
     for line in f:
         line = line.split()
