@@ -7,9 +7,9 @@ def evaluateEnergy(J, configuration):
     calculate the energy of a given configuration.
 
     Parameters:
-    J: 
+        >>> J: 
         nSpin*nSpin matrix, J[i,j] is the interation between spin i and j.
-    configuration: 
+        >>> configuration: 
         nSpin*1 vector, configuration[i] stores the spin at site i.
 
     Returns:
@@ -18,13 +18,29 @@ def evaluateEnergy(J, configuration):
     return 0.5*np.dot(configuration,np.dot(J,configuration))
 
 
+def energyChange(J,oldConfiguration,iSite):
+    """
+    calculate the energy change when flip one spin at site i.
+
+    Parameters:
+        >>> J:
+            nSpin*nSpin matrix, J[i,j] is the interation between spin i and j.
+        >>> oldConfiguration:
+            the configuration before flip.
+        >>> iSite:
+            the site that the spin flips
+
+    """
+    pass
+
+
 
 def readCoupling(nSpin):
     """
     read spin-spin coupling strength from the file(example.txt).
     
     Parameters:
-        nSpin:
+        >>> nSpin:
             the number of spins, in example.txt is 300.
 
     Returns:
@@ -42,22 +58,27 @@ def readCoupling(nSpin):
 
 
 
-def guessConfiguration(nSpin, J, nGuess):
+def getConfiguration(nSpin, J, nFlip):
     """
-    random generate spin configuration nGuess times and keep the best.
+    Random flip spin and accept the configuration if the energy is lower.
 
     Parameters:
-        nSpin: number of spins in the system.
-        J: the coupling matrix read from the file
-        nGuess: number of random guess of the spin configuration.
+        >>> nSpin: spin number in the system.
+        >>> nFlip: random flip spin times.
+        >>> J: the coupling matrix read from the file
 
     Returns:
         minConfiguration: the minimum energy spin configuration.
         minEnergy: the corresponding minimum energy.
     """
     minEnergy = 0
-    for i in range(nGuess):
-        newConfiguration = np.random.randint(0,2,nSpin)*2 -1
+    #Flip mSites' spins a time
+    mSites = 1
+    #generate a random configuration first
+    newConfiguration = np.random.randint(0,2,nSpin)*2 -1
+    for iFlip in range(nFlip):
+        randomSites = np.random.randint(0,nSpin,mSites)
+        newConfiguration[randomSites] = -newConfiguration[randomSites]
         newEnergy = evaluateEnergy(J, newConfiguration)
         if newEnergy < minEnergy:
             minEnergy = newEnergy
@@ -66,8 +87,11 @@ def guessConfiguration(nSpin, J, nGuess):
     return minEnergy, minConfiguration
 
 
+
 nSpin = 300
+nFlip = nSpin*50
 J = readCoupling(nSpin)
-minEnergy, minConfiguration = guessConfiguration(nSpin, J, nGuess=20)
+np.random.seed()
+minEnergy, minConfiguration = getConfiguration(nSpin, J, nFlip)
 print minEnergy
 print 'v '+' '.join(map(str, minConfiguration))
