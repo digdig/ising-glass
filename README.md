@@ -1,5 +1,5 @@
-*Note: this extended readme is modified on the original version, it can be downloaded 
-when you login beta.mindi.io and click `view example` and `download sample data`*
+**Note: this extended readme is modified on the original version, it can be downloaded 
+when you login beta.mindi.io and click `view example` and `download sample data`**
 
 # Ising spin glass example
 

@@ -1,36 +1,55 @@
 #! /usr/bin/env python
-import sys, random
+import sys
 import numpy as np
 
-# Evaluate the energy given a coupling matrix and configuration
-def evaluate_energy(J, cfg):
-    tot = 0
-    for i in range(len(cfg)):
-        for j in range(i+1, len(cfg)):
-            tot += J[i,j]*cfg[i]*cfg[j]
-    return tot
+def evaluateEnergy(J, configuration):
+    """
+    calculate the energy of a given configuration
+    Args:
+    J: 
+        N*N matrix, J[i,j] is the interation between  
+        spins[i] and spin[j]
 
-# Read coupling matrix
+    configuration: 
+        N*1 vector, configuration[i] stores the spin 
+        at site i
+
+    Returns:
+        the total energy of this configuration
+    """
+    return 0.5*np.dot(configuration,np.dot(J,configuration))
+
+def readCoupling(N):
+    """
+    read spin-spin coupling strength from the file(example.txt)
+    
+    Args:
+        N:
+            the number of spins, in example.txt is 300
+
+    Returns:
+        the symmetric matrix J with J[i,j] represent 
+        the coupling strength of spin[i] and spin[j]
+
+    """
+    J = np.zeros((N,N)) #zero if not defined in the file
+    with open(sys.argv[1], 'r') as f:
+        for line in f:
+            line = line.split()
+            J[int(line[0]),int(line[1])] = float(line[2])
+            J[int(line[1]),int(line[0])] = float(line[2])
+    return J
+
 N = 300
-J = np.zeros((N,N))
-with open(sys.argv[1], 'r') as f:
-    for line in f:
-        line = line.split()
-        spin_a, spin_b, coupling = int(line[0]), int(line[1]), float(line[2])
-        assert(spin_a != spin_b)
-        if (spin_a < spin_b):
-            J[spin_a,spin_b] = coupling
-        else:
-            J[spin_b,spin_a] = coupling
+J = readCoupling(N)
+minEnergy = 0
 
-# Solve for minimum spin configuration (by random guessing)
-min_energy = 1.e9
-min_cfg = [1]*N
 for i in range(10):
-    cfg = [(2*random.randint(0,1)-1) for i in xrange(N)]
-    energy = evaluate_energy(J, cfg)
-    if energy < min_energy:
-        min_energy = energy
-        min_cfg = cfg
-print min_energy
-print 'v '+' '.join(map(str, min_cfg))
+    #generate a new configuration by random guessing
+    newConfiguration = np.random.randint(0,2,N)*2 -1
+    newEnergy = evaluateEnergy(J, newConfiguration)
+    if newEnergy < minEnergy:
+        minEnergy = newEnergy
+        minConfiguration = newConfiguration
+print minEnergy
+print 'v '+' '.join(map(str, minConfiguration))
