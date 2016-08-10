@@ -77,8 +77,8 @@ def getConfiguration(nSpin, J, nFlip):
     #generate a random configuration first
     newConfiguration = np.random.randint(0,2,nSpin)*2 -1
     for iFlip in range(nFlip):
-        randomSites = np.random.randint(0,nSpin,mSites)
-        newConfiguration[randomSites] = -newConfiguration[randomSites]
+        randomSites = np.random.choice(nSpin,mSites,replace=False)
+        newConfiguration[randomSites] *= -1
         newEnergy = evaluateEnergy(J, newConfiguration)
         if newEnergy < minEnergy:
             minEnergy = newEnergy
