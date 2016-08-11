@@ -19,22 +19,22 @@ def totalEnergy(J, configuration):
     return 0.5*np.dot(configuration,np.dot(J,configuration))
 
 
-def energyChange(J,configuration,randomSite):
+def energyChange(J,configuration,iSpin):
     """
-    calculate the energy change when flip one spin at one randomSite.
+    calculate the energy change when flip one spin at site i.
 
     Parameters:
         >>> J:
             nSpin*nSpin matrix, J[i,j] is the interation between spin i and j.
         >>> configuration:
             the configuration before flip the spin.
-        >>> randomSite:
-            the site number that the spin flips
+        >>> iSpin:
+            the i-th spin that flips
     Returns:
         the energy difference when flip one spin
     """
     # energy after - energy before, double counting considered
-    return -configuration[randomSite]*np.dot(J[randomSite,:],configuration)
+    return -configuration[iSpin]*np.dot(J[iSpin,:],configuration)
 
 
 
@@ -61,34 +61,49 @@ def getJ(nSpin):
 
 
 
-def getConfiguration(nSpin, J, nFlip):
+def getConfiguration(nSpin, J, nConfiguration):
     """
-    Random flip one spin and accept the configuration if the energy is lower.
+    Random generate nConfiguratin and get the lowest local minimum. 
+
+    To get the local minimum for a random configuration, sequentially flip 
+    the spins and accept the configuration if the energy is lower.
 
     Parameters:
         >>> nSpin: spin number in the system.
-        >>> nFlip: number of random one spin flip.
-        >>> J: the coupling matrix read from the file
+        >>> J: the coupling matrix read from the file.
+        >>> nConfiguration: number of trail initial random configurations.
 
     Returns:
-        configuration: the minimum energy spin configuration.
-        energy: the corresponding minimum energy.
+        globalConfiguration: the global minimum energy spin configuration.
+        globalMinEnergy: the global minimum energy of all the trails.
     """
-    #generate a random configuration first
-    configuration = np.random.randint(0,2,nSpin)*2 -1
-    for iFlip in range(nFlip):
-        randomSite = np.random.choice(nSpin)
-        if energyChange(J,configuration,randomSite) < 0:
-            configuration[randomSite] *= -1
+    globalMinEnergy = 10e10
 
-    return totalEnergy(J,configuration), configuration
+    for iConfiguration in range(nConfiguration):
+        configuration = np.random.randint(0,2,nSpin)*2 -1
+        localMinEnergy = 10e9
+        oneCycleMinEnergy = 10e8    #min energy after flip nSpin spins
+
+        #this while loop get a local min energy and the configuration
+        while(oneCycleMinEnergy < localMinEnergy):
+            localMinEnergy = oneCycleMinEnergy
+            for iSpin in range(nSpin):
+                if energyChange(J,configuration,iSpin) < 0:
+                    configuration[iSpin] *= -1
+            oneCycleMinEnergy = totalEnergy(J, configuration)
+
+        #while ends, localMinEnergy get
+        if(globalMinEnergy > localMinEnergy):
+            globalMinEnergy = localMinEnergy
+            globalConfiguration = configuration
+
+    return totalEnergy(J,globalConfiguration), globalConfiguration
 
 
 
 nSpin = 300
-nFlip = nSpin*300
 J = getJ(nSpin)
 np.random.seed()
-energy, configuration = getConfiguration(nSpin, J, nFlip)
-print energy
-print 'v '+' '.join(map(str, configuration))
+energy, configuration = getConfiguration(nSpin, J, 300)
+print(energy)
+print('v '+' '.join(map(str, configuration)))
