@@ -104,6 +104,6 @@ def getConfiguration(nSpin, J, nConfiguration):
 nSpin = 300
 J = getJ(nSpin)
 np.random.seed()
-energy, configuration = getConfiguration(nSpin, J, 300)
+energy, configuration = getConfiguration(nSpin, J, nConfiguration=400)
 print(energy)
 print('v '+' '.join(map(str, configuration)))
